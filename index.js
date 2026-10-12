@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 
+let currentUser = null;
 
 app.get("/", (req, res) => {
     res.render("index", { posts: posts });
@@ -82,6 +83,13 @@ app.get("/signin", (req, res) => {
 
     res.render("signin");
 });
+
+app.get("/signup", (req, res) => {
+
+    res.render("signup");
+});
+
+
 
 app.listen(port, () => {
     console.log(`The Server is running on port ${port}!!`);

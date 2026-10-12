@@ -49,15 +49,15 @@
     <% posts.forEach(post => { %>
         <div class="post">
             <h3><%= post.title %></h3>
-            <p><%= post.content %></p>
-            <p>Created by: <%= post.creator %></p>
-            <p>Category: <%= post.category %></p>
+            <p><%= post.body %></p>
+            <p>Created by: <%= post.creator_name %></p>
+            <p>Date Created: <%= post.date_created %></p>
         
-            <form action="/edit/<%= post.id %>" method="GET">
+            <form action="/edit/<%= post.blog_id %>" method="GET">
                 <button type="submit">Edit Post</button>
             </form>
 
-            <form action="/delete/<%= post.id %>" method="POST">
+            <form action="/delete/<%= post.blog_id %>" method="POST">
                 <button type="submit">Delete Post</button>
             </form>
         </div>

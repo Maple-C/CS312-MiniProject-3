@@ -1,6 +1,18 @@
 import express from "express";
+import pg from "pg";
 const app = express();
 const port = 3000;
+
+const db = new pg.Pool({
+    user: "postgres",
+    host: "localhost",
+    database: "BlogDB",
+    password: "cs3122006",
+    port: 5432,
+
+});
+
+    
 
 // Middleware yay!
 app.use(express.urlencoded({ extended: true }));
@@ -64,6 +76,11 @@ app.post("/create-post", (req, res) => {
 app.post ("/delete/:id", (req, res) => {
     posts = posts.filter(p => p.id != req.params.id);
     res.redirect("/");
+});
+
+app.get("/signin", (req, res) => {
+
+    res.render("signin");
 });
 
 app.listen(port, () => {

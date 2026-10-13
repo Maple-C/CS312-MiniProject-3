@@ -9,15 +9,10 @@
         <h1> EDIT POST</h1>
 
         <form action = "/edit/<%= post.id %>" method = "POST">
-            <input name = "creator" type = "text" value = "<%= post.creator %>" required>
             <input name = "title" type = "text" value = "<%= post.title %>" required>
             <textarea name = "content" required><%= post.content %></textarea>
 
-            <select name = "category">
-                <option value = "Technology" <%= post.category === 'Technology' ? 'selected' : '' %>>Technology</option>
-                <option value = "Education" <%= post.category === 'Education' ? 'selected' : '' %>>Education</option>
-                <option value = "Lifestyle" <%= post.category === 'Lifestyle' ? 'selected' : '' %>>Lifestyle</option>
-            </select>
+
             <button type = "submit">SAVE</button>
         </form> 
     </body>

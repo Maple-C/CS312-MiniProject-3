@@ -19,16 +19,17 @@
     <h3>Create New post</h3>
 
 
-
+    <a href="/signin">Sign In</a>
+    <a href="/signup">Sign Up</a>
+    <a href="/signout">Sign Out</a>
 
 
     <form action="/create-post" method="POST">
-        <input type="text" name="creator" placeholder="Creator" required>
+        <!-- <input type="text" name="creator" placeholder="Creator" required> -->
         <input type="text" name = "title" placeholder = "Title of post" required>
         <textarea name = "content" placeholder = "Content of post" required></textarea>
 
-        <select name="category">
-            <list>
+        <!-- <select name="category">
                 <option>
                     Technology
                 </option>"
@@ -38,9 +39,8 @@
                 <Option>
                     Lifestyle
                 </Option>
-            </list>
         </select>
-            
+             -->
 
         <button type="submit">Create Post</button>
   

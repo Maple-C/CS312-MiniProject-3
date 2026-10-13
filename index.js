@@ -45,26 +45,84 @@ app.get("/", async (req, res) => {
 //     res.send("Homepage is now functioning properly");
 // });
 
-app.get("/edit/:id", (req, res) => {
-    const post = posts.find(p => p.blog_id == req.params.id);
-    res.render("edit", { post: post });
+app.get("/edit/:id", async (req, res) => {
+    if (!currentUser) {
+        return res.send("You must be signed in to edit a post."
+        );
+    }
+    try {
+
+        const result =  await db.query(`select * from blogs where blog_id = $1`, [req.params.id]);
+
+        const post = result.rows[0];
+
+        if (result.rows.length === 0) {
+            return res.send("Post not found.");
+        }
+
+        if(post.creator_user_id !== currentUser.user_id) {
+            return res.send(
+                "You are not authorized to edit this post."
+
+            );
+          
+        }
+
+
+        res.render("edit", { post }); } catch (error) {
+        
+        console.error(error);
+
+        res.send("There was an error while trying to grab the post. Please try again."
+
+        );
+    }
 });
+        
+
 
 // Hopefully acctually updates the post 
-app.post("/edit/:id", (req, res) => {
-    let post = posts.find(p => p.blog_id == req.params.id);
+app.post("/edit/:id", async (req, res) => {
+    if (!currentUser) {
+        return res.send("You must be signed in to edit a post!"
+        );
+    }   
+    try {
 
+        const check = await db.query(`select * from blogs where blog_id = $1`, [req.params.id]);
 
-    post.creator = req.body.creator;
-    post.title = req.body.title;
-    post.content = req.body.content;
-    post.category = req.body.category;
+        const post = check.rows[0];
 
-    res.redirect("/");
+        if (check.rows.length === 0) {
+            return res.send("Post not found.");
+        }
+
+        if(post.creator_user_id !== currentUser.user_id) {
+            res.send("You are not authorized to edit this post.");
+            return;
+        }
+
+        await db.query(
+            `update blogs set title = $1, body = $2 where blog_id = $3`,
+            [
+                req.body.title,
+                req.body.content,
+                req.params.id
+            ]
+        );
+
+        res.redirect("/");
+
+    } catch (error) {
+        console.error(error);
+        res.send("There was an error while trying to update the post. Please try again.");
+    }
 });
 
 
-let posts = [];
+
+
+
 
 // for creating new post    
 
@@ -72,26 +130,86 @@ let posts = [];
 
 app.post("/create-post", async (req, res) => {
 
-    const { creator, title, content} = req.body;
+    if(!currentUser) {
+        return res.send("You must be signed in to create a post."
 
-   
-    let newPost = {
-        id: Date.now(),
-        creator: creator,
-        title: title,
-        content: content,
-        category: category,
-        createdAt: new Date().toLocaleString()
-    };
+        );
+    }
+    const { title, content} = req.body;
 
-    posts.push(newPost); //should add the post then return back home
+    try {
+
+        await db.query(
+            `insert into blogs
+            (
+                creator_name,
+                creator_user_id,
+                title,
+                body,
+                date_created
+            )
+            values 
+            ($1, $2, $3, $4, current_timestamp)`,
+
+            [currentUser.name, currentUser.user_id, title, content]
+        );
+
+        res.redirect("/");
+
+    } catch (error) {
+        console.error(error);
+        res.send("There was an error while creating the post. Please try again.");
+    }
+
+
+
+    // let newPost = {
+    //     id: Date.now(),
+    //     creator: creator,
+    //     title: title,
+    //     content: content,
+    //     category: category,
+    //     createdAt: new Date().toLocaleString()
+    // };
+
+    // posts.push(newPost); //should add the post then return back home
    
-    res.redirect("/");
+    // res.redirect("/");
 });
 
-app.post ("/delete/:id", (req, res) => {
-    posts = posts.filter(p => p.blog_id != req.params.id);
-    res.redirect("/");
+app.post ("/delete/:id", async (req, res) => {
+
+    if(!currentUser) {
+        return res.send("You must be signed in to delete a post!"
+        );
+    }
+
+    console.log("delete route hit");
+
+    try {
+
+        const check = await db.query(`select * from blogs where blog_id = $1`, [req.params.id]);
+
+        const post = check.rows[0];
+
+         if (check.rows.length === 0) {
+            return res.send("Post not found.");
+        }
+
+
+        if(post.creator_user_id !== currentUser.user_id) {
+            res.send("You are not authorized to delete this post.");
+            return;
+        }
+
+        await db.query('delete from blogs where blog_id = $1', [req.params.id]);
+
+        res.redirect("/");
+
+    } catch (error) {
+        console.error(error);
+        res.send("There was an error while trying to delete the post. Please try again.");
+    }
 });
 
 app.get("/signin", (req, res) => {
@@ -102,6 +220,12 @@ app.get("/signin", (req, res) => {
 app.get("/signup", (req, res) => {
 
     res.render("signup");
+});
+
+app.get("/signout", (req, res) => {
+
+    currentUser = null;
+    res.redirect("/");
 });
 
 
@@ -182,4 +306,4 @@ app.post ("/signup", async (req, res) => {
 
 app.listen(port, () => { 
     console.log(`The Server is running on port ${port}!!`);
-});
+})
